@@ -56,14 +56,8 @@ exports.author_create_post = [
     .withMessage("Family name must be specified.")
     .isAlphanumeric()
     .withMessage("Family name has non-alphanumeric characters."),
-  body("date_of_birth", "Invalid date of birth")
-    .optional({ values: "falsy" })
-    .isISO8601()
-    .toDate(),
-  body("date_of_death", "Invalid date of death")
-    .optional({ values: "falsy" })
-    .isISO8601()
-    .toDate(),
+  body("date_of_birth", "Invalid date of birth").optional({ values: "falsy" }).isISO8601().toDate(),
+  body("date_of_death", "Invalid date of death").optional({ values: "falsy" }).isISO8601().toDate(),
 
   // Process request after validation and sanitization.
   asyncHandler(async (req, res, next) => {

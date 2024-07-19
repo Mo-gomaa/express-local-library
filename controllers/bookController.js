@@ -76,25 +76,15 @@ exports.book_create_post = [
   // Convert the genre to an array.
   (req, res, next) => {
     if (!Array.isArray(req.body.genre)) {
-      req.body.genre =
-        typeof req.body.genre === "undefined" ? [] : [req.body.genre];
+      req.body.genre = typeof req.body.genre === "undefined" ? [] : [req.body.genre];
     }
     next();
   },
 
   // Validate and sanitize fields.
-  body("title", "Title must not be empty.")
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
-  body("author", "Author must not be empty.")
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
-  body("summary", "Summary must not be empty.")
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
+  body("title", "Title must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("author", "Author must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("summary", "Summary must not be empty.").trim().isLength({ min: 1 }).escape(),
   body("isbn", "ISBN must not be empty").trim().isLength({ min: 1 }).escape(),
   body("genre.*").escape(),
   // Process request after validation and sanitization.
@@ -144,12 +134,41 @@ exports.book_create_post = [
 
 // Display book delete form on GET.
 exports.book_delete_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Book delete GET");
+  const [book, allBookInstances] = await Promise.all([
+    Book.findById(req.params.id).exec(),
+    BookInstance.find({}).exec(),
+  ]);
+
+  if (book === null) {
+    // No results.
+    res.redirect("/catalog/books");
+  }
+
+  res.render("book_delete", {
+    title: "Delete Book",
+    book: book,
+    bookinstances: allBookInstances,
+  });
 });
 
 // Handle book delete on POST.
 exports.book_delete_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Book delete POST");
+  const [book, allBookInstances] = await Promise.all([
+    Book.findById(req.params.id).exec(),
+    BookInstance.find({}).exec(),
+  ]);
+
+  if (allBookInstances.length > 0) {
+    res.render("book_delete", {
+      title: "Delete Book",
+      book: book,
+      bookinstances: allBookInstances,
+    });
+    return;
+  } else {
+    await Book.findByIdAndDelete(req.body.bookid);
+    res.redirect("/catalog/books");
+  }
 });
 
 // Display book update form on GET.
@@ -185,25 +204,15 @@ exports.book_update_post = [
   // Convert the genre to an array.
   (req, res, next) => {
     if (!Array.isArray(req.body.genre)) {
-      req.body.genre =
-        typeof req.body.genre === "undefined" ? [] : [req.body.genre];
+      req.body.genre = typeof req.body.genre === "undefined" ? [] : [req.body.genre];
     }
     next();
   },
 
   // Validate and sanitize fields.
-  body("title", "Title must not be empty.")
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
-  body("author", "Author must not be empty.")
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
-  body("summary", "Summary must not be empty.")
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
+  body("title", "Title must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("author", "Author must not be empty.").trim().isLength({ min: 1 }).escape(),
+  body("summary", "Summary must not be empty.").trim().isLength({ min: 1 }).escape(),
   body("isbn", "ISBN must not be empty").trim().isLength({ min: 1 }).escape(),
   body("genre.*").escape(),
 
@@ -253,4 +262,3 @@ exports.book_update_post = [
     }
   }),
 ];
-
